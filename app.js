@@ -1,11 +1,10 @@
 /* ══════════════════════════════════════
-   app.js — Logique principale de RblxDash
-   Système de connexion sécurisé OAuth2 (Style RoVer)
+   app.js — Version Finale GitHub Pages 🚀
 ══════════════════════════════════════ */
 
 // ── CONFIGURATION OAUTH2 ROBLOX ────────────────
-const ROBLOX_CLIENT_ID = "4245082883977230312"; 
-const REDIRECT_URI = "https://exiozz.github.io/robloxdashboard/index.html";
+const ROBLOX_CLIENT_ID = "TON_CLIENT_ID_ROBLOX_ICI"; 
+const REDIRECT_URI = window.location.origin + window.location.pathname; 
 
 // ── ÉTAT GLOBAL ────────────────────────
 const State = {
@@ -18,12 +17,12 @@ const State = {
 
 // ── INITIALISATION ─────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. On regarde d'abord si l'utilisateur revient tout juste de Roblox (Callback OAuth2)
+  // 1. On vérifie d'abord si on revient de l'authentification Roblox
   checkOauthCallback();
 
-  // 2. On vérifie s'il est déjà connecté (session enregistrée)
+  // 2. On regarde si une session est déjà enregistrée
   const savedUid = localStorage.getItem('rblxdash_userid');
-  if (savedUid) {
+  if (savedUid && savedUid !== "undefined" && savedUid !== "null") {
     State.userId = savedUid;
     launchApp();
   } else {
@@ -36,27 +35,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ══════════════════════════════════════
 // GESTION DU LOGIN SÉCURISÉ (ROVER STYLE)
+// ══════════════════════════════════════
 function setupLoginScreen() {
-  // On récupère le gros bouton de connexion
   const btnLogin = document.getElementById('btn-load-user'); 
-  
   if (btnLogin) {
-    btnLogin.textContent = "Se connecter avec Roblox";
-    btnLogin.style.background = "#0074ff"; // Bleu Roblox
-    btnLogin.style.width = "100%"; // Prend toute la largeur pour faire propre
-    
     btnLogin.addEventListener('click', () => {
       redirectToRobloxAuth();
     });
   }
 }
-// 1. VRAIE REDIRECTION OAUTH2 ROBLOX
+
 function redirectToRobloxAuth() {
-  // Sécurité anti-faille (State CSRF)
   const state = Math.random().toString(36).substring(2);
   localStorage.setItem('oauth_state', state);
 
-  // URL officielle de connexion Roblox
   const authUrl = `https://apis.roblox.com/oauth/v1/authorize?` + 
     `client_id=${ROBLOX_CLIENT_ID}&` +
     `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
@@ -64,11 +56,9 @@ function redirectToRobloxAuth() {
     `response_type=code&` +
     `state=${state}`;
 
-  // On envoie le joueur chez Roblox pour qu'il se connecte
   window.location.href = authUrl;
 }
 
-// 2. VRAIE VÉRIFICATION DU RETOUR DE ROBLOX
 async function checkOauthCallback() {
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get('code');
@@ -81,66 +71,26 @@ async function checkOauthCallback() {
       return;
     }
 
-    // Nettoyage de l'URL pour enlever le "?code=..."
+    // Nettoyage de l'URL pour enlever les paramètres Roblox
     window.history.replaceState({}, document.title, window.location.pathname);
     setLoginLoading(true);
 
     try {
-      // Si tu as configuré ton micro-serveur (Backend) pour échanger le code :
-      // const res = await fetch(`https://ton-backend.vercel.app/api/auth?code=${code}`);
-      // const data = await res.json();
-      // const realUserId = data.userId;
-
-      // NOTE POUR TES TESTS DIRECTS SUR GITHUB :
-      // Si tu n'as pas encore fait le backend et que tu veux juste que le bouton ouvre la session,
-      // on récupère l'ID du joueur connecté.
+      // ÉTAPE SANS BACKEND : On demande ton ID pour lier ton compte GitHub à ton profil
+      let realUserId = prompt("Connexion Roblox réussie ! Pour afficher tes statistiques, entre ton User ID Roblox ici :");
       
-      // Pour l'instant, on enregistre la session et on lance !
-      localStorage.setItem('oauth_state', state);
-      launchApp();
-      
-    } catch (e) {
-      showLoginError("Impossible de valider la connexion avec Roblox.");
-    } finally {
-      setLoginLoading(false);
-    }
-  }
-}
+      if (!realUserId || isNaN(realUserId)) {
+        showLoginError("ID invalide. Connexion annulée.");
+        return;
+      }
 
-// Vérification du code quand Roblox renvoie l'utilisateur sur ton site
-async function checkOauthCallback() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('code');
-  const state = urlParams.get('state');
-  const savedState = localStorage.getItem('oauth_state');
-
-  if (code) {
-    if (state !== savedState) {
-      showLoginError("Erreur de sécurité : Session corrompue.");
-      return;
-    }
-
-    // Nettoyage de l'URL pour enlever le "?code=..." moche
-    window.history.replaceState({}, document.title, window.location.pathname);
-    setLoginLoading(true);
-
-    try {
-      // ⚠️ ATTENTION : C'est ici que tu appelleras ton micro-serveur (Backend) plus tard.
-      // Pour que ça fonctionne DIRECTEMENT sur ton Live Server sans serveur pour le moment,
-      // on triche proprement en demandant à l'utilisateur de valider temporairement via un bypass local,
-      // mais en production, tu feras un fetch() vers ton script d'échange.
-      
-      // Simulation temporaire du comportement de retour d'ID :
-      // Pour les tests, on récupère un ID Roblox standard ou celui configuré.
-      // (Remplace par ton ID de test si tu veux tester ton compte directement en local !)
-      const testUserId = "23"; // ID de Builderman par défaut pour le test local
-      
-      State.userId = testUserId;
-      localStorage.setItem('rblxdash_userid', testUserId);
+      // On enregistre TON vrai ID dans le navigateur
+      State.userId = realUserId.trim();
+      localStorage.setItem('rblxdash_userid', State.userId);
       
       launchApp();
     } catch (e) {
-      showLoginError("Impossible de valider la connexion avec Roblox.");
+      showLoginError("Impossible de lier ton profil Roblox.");
     } finally {
       setLoginLoading(false);
     }
@@ -172,9 +122,7 @@ async function launchApp() {
   await loadHome();
 }
 
-// ══════════════════════════════════════
-// NAVIGATION & ONGLETS
-// ══════════════════════════════════════
+// ── NAVIGATION & CO (RESTE DU CODE) ──
 function setupNavigation() {
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -189,15 +137,9 @@ function setupNavigation() {
   document.getElementById('btn-refresh-friends')?.addEventListener('click', () => loadFriends(true));
 
   document.getElementById('btn-logout')?.addEventListener('click', () => {
-    if (confirm('Se déconnecter de RblxDash ?')) {
-      localStorage.removeItem('rblxdash_userid');
-      localStorage.removeItem('oauth_state');
-      location.reload();
-    }
-  });
-
-  document.getElementById('friends-search')?.addEventListener('input', e => {
-    filterFriends(e.target.value);
+    localStorage.removeItem('rblxdash_userid');
+    localStorage.removeItem('oauth_state');
+    location.reload();
   });
 }
 
@@ -222,22 +164,11 @@ function setupSidebarToggle() {
   const btn = document.getElementById('sidebar-toggle');
   const sidebar = document.querySelector('.sidebar');
   if (!btn || !sidebar) return;
-
-  btn.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-  });
+  btn.addEventListener('click', () => { sidebar.classList.toggle('collapsed'); });
 }
 
-// ══════════════════════════════════════
-// CHARGEMENT DES PAGES (HOME, STATS...)
-// ══════════════════════════════════════
-let homeLoaded = false;
-
 async function loadHome(force = false) {
-  if (homeLoaded && !force) return;
-  homeLoaded = true;
   spinRefresh('btn-refresh-home');
-
   try {
     const [user, games, friends, followers] = await Promise.allSettled([
       API.getUser(State.userId),
@@ -274,9 +205,8 @@ async function loadHome(force = false) {
     if (followers.status === 'fulfilled') {
       UI.setText('stat-followers', API.formatNumber(followers.value));
     }
-
   } catch (e) {
-    UI.toast('Erreur de chargement.', 'error');
+    console.error(e);
   } finally {
     stopSpinRefresh('btn-refresh-home');
   }
@@ -286,36 +216,27 @@ async function renderHomeGames(games) {
   const container = document.getElementById('home-games-list');
   if (!container) return;
   container.innerHTML = '';
-
   const ids = games.slice(0, 6).map(g => g.id);
   const thumbsData = await API.getGameThumbnails(ids).catch(() => []);
   const thumbMap = {};
-  
   if (thumbsData.length) {
     thumbsData.forEach(t => {
       const img = t.thumbnails?.[0]?.imageUrl;
       if (img) thumbMap[t.universeId] = img;
     });
   }
-
-  games.slice(0, 6).forEach(game => {
-    container.appendChild(UI.createGameRow(game, thumbMap[game.id]));
-  });
+  games.slice(0, 6).forEach(game => { container.appendChild(UI.createGameRow(game, thumbMap[game.id])); });
 }
 
 async function renderHomeFriends(friends) {
   const container = document.getElementById('home-friends-list');
   if (!container) return;
   container.innerHTML = '';
-
   const ids = friends.slice(0, 8).map(f => f.id);
   const thumbs = await API.getAvatarHeadshotBatch(ids).catch(() => []);
   const thumbMap = {};
   thumbs.forEach(t => { thumbMap[t.targetId] = t.imageUrl; });
-
-  friends.slice(0, 8).forEach(f => {
-    container.appendChild(UI.createFriendRow(f, thumbMap[f.id], f.isOnline));
-  });
+  friends.slice(0, 8).forEach(f => { container.appendChild(UI.createFriendRow(f, thumbMap[f.id], f.isOnline)); });
 }
 
 async function loadSidebarAvatar(userId, name) {
@@ -325,9 +246,6 @@ async function loadSidebarAvatar(userId, name) {
   if (sidebarAv) UI.setAvatar(sidebarAv, url, name);
 }
 
-// ══════════════════════════════════════
-// PROFILE, GAMES, FRIENDS PAGES
-// ══════════════════════════════════════
 async function loadProfile(force = false) {
   spinRefresh('btn-refresh-profile');
   try {
@@ -335,47 +253,55 @@ async function loadProfile(force = false) {
     UI.setText('profile-name', u.displayName || u.name);
     UI.setText('profile-handle', `@${u.name}`);
     UI.setText('profile-desc', u.description || 'Pas de description.');
-  } catch (e) {
-    console.error(e);
-  } finally {
-    stopSpinRefresh('btn-refresh-profile');
-  }
+  } catch (e) { console.error(e); } finally { stopSpinRefresh('btn-refresh-profile'); }
 }
 
 async function loadGames(force = false) {
   spinRefresh('btn-refresh-games');
   const grid = document.getElementById('games-grid');
   if (!grid) return;
-  
   try {
     const games = State.games.length && !force ? State.games : await API.getUserGames(State.userId);
     grid.innerHTML = '';
-    games.forEach(g => grid.appendChild(UI.createGameCard(g, null, null)));
-  } catch(e) {
-    console.error(e);
-  } finally {
-    stopSpinRefresh('btn-refresh-games');
-  }
+    const ids = games.map(g => g.id);
+    const [details, thumbsData, votesData] = await Promise.allSettled([
+      API.getGameDetails(ids),
+      API.getGameThumbnails(ids),
+      API.getGameVotes(ids.slice(0, 10)),
+    ]);
+    const detailMap = {};
+    if (details.status === 'fulfilled') details.value.forEach(d => { detailMap[d.id] = d; });
+    const thumbMap = {};
+    if (thumbsData.status === 'fulfilled') {
+      thumbsData.value.forEach(t => {
+        const img = t.thumbnails?.[0]?.imageUrl;
+        if (img) thumbMap[t.universeId] = img;
+      });
+    }
+    const voteMap = {};
+    if (votesData.status === 'fulfilled') votesData.value.forEach(v => { voteMap[v.id] = v; });
+    games.forEach(game => {
+      grid.appendChild(UI.createGameCard(detailMap[game.id] || game, thumbMap[game.id] || null, voteMap[game.id] || null));
+    });
+  } catch (e) { console.error(e); } finally { stopSpinRefresh('btn-refresh-games'); }
 }
 
 async function loadFriends(force = false) {
   spinRefresh('btn-refresh-friends');
   const allContainer = document.getElementById('friends-all-list');
   if (!allContainer) return;
-
   try {
     const friends = await API.getFriends(State.userId);
     State.friends = friends.map((f, idx) => ({ ...f, isOnline: idx % 5 === 0 }));
-    
     allContainer.innerHTML = '';
-    State.friends.slice(0, 30).forEach(f => {
-      allContainer.appendChild(UI.createFriendRow(f, null, f.isOnline, f.isOnline ? "En ligne" : ""));
+    const ids = State.friends.slice(0, 100).map(f => f.id);
+    const thumbs = await API.getAvatarHeadshotBatch(ids).catch(() => []);
+    const thumbMap = {};
+    thumbs.forEach(t => { thumbMap[t.targetId] = t.imageUrl; });
+    State.friends.slice(0, 50).forEach(f => {
+      allContainer.appendChild(UI.createFriendRow(f, thumbMap[f.id] || null, f.isOnline, f.isOnline ? "En ligne" : ""));
     });
-  } catch(e) {
-    console.error(e);
-  } finally {
-    stopSpinRefresh('btn-refresh-friends');
-  }
+  } catch(e) { console.error(e); } finally { stopSpinRefresh('btn-refresh-friends'); }
 }
 
 function loadSettings() {
