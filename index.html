@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RblxDash — Dashboard Roblox</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<div id="login-screen" class="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-icon">🎮</div>
+      <h1>RblxDash</h1>
+      <p>Dashboard non-officiel pour Roblox</p>
+    </div>
+
+    <div class="login-step" id="step-userid" style="text-align: center; margin-top: 24px;">
+      <p style="color: var(--text2); font-size: 14px; margin-bottom: 20px;">
+        Connecte-toi en toute sécurité via l'authentification officielle de Roblox.
+      </p>
+      
+      <button id="btn-load-user" class="btn-confirm" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+        Se connecter avec Roblox
+      </button>
+    </div>
+
+    <div id="login-error" class="login-error hidden" style="margin-top: 15px;"></div>
+    
+    <div id="login-loading" class="login-loading hidden" style="margin-top: 15px;">
+      <div class="spinner"></div> Connexion sécurisée en cours…
+    </div>
+
+    <div class="login-footer" style="margin-top: 30px;">
+      <i class="ti ti-shield-lock"></i>
+      Connexion OAuth2 sécurisée par Roblox. Aucune information sensible n'est enregistrée.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="app" class="app hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        RblxDash
+      </div>
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Fermer le menu">
+        <i class="ti ti-layout-sidebar-left-collapse"></i>
+      </button>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">Menu</div>
+      <div class="nav-item active" data-page="home">
+        <i class="ti ti-home" aria-hidden="true"></i>
+        <span>Accueil</span>
+      </div>
+      <div class="nav-item" data-page="profile">
+        <i class="ti ti-user" aria-hidden="true"></i>
+        <span>Profil</span>
+      </div>
+      <div class="nav-item" data-page="games">
+        <i class="ti ti-device-gamepad-2" aria-hidden="true"></i>
+        <span>Mes jeux</span>
+      </div>
+      <div class="nav-item" data-page="friends">
+        <i class="ti ti-users" aria-hidden="true"></i>
+        <span>Amis</span>
+      </div>
+      <div class="nav-section">Compte</div>
+      <div class="nav-item" data-page="settings">
+        <i class="ti ti-settings" aria-hidden="true"></i>
+        <span>Paramètres</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-user" id="sidebar-user">
+      <div class="sidebar-avatar" id="sidebar-avatar-img"></div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-username" id="sidebar-username">…</div>
+        <div class="sidebar-status"><span class="dot-online"></span> En ligne</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main-content">
+
+    <!-- ── HOME ── -->
+    <section id="page-home" class="page active">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Tableau de bord</h1>
+          <p class="page-sub" id="home-greeting">Bonjour !</p>
+        </div>
+        <button class="btn-refresh" id="btn-refresh-home" title="Actualiser">
+          <i class="ti ti-refresh"></i>
+        </button>
+      </div>
+
+      <div class="stats-grid" id="home-stats">
+        <div class="stat-card c1 skeleton-card">
+          <div class="stat-icon ic1"><i class="ti ti-eye" aria-hidden="true"></i></div>
+          <div class="stat-label">Visites totales</div>
+          <div class="stat-value" id="stat-visits">—</div>
+          <div class="stat-delta" id="stat-visits-delta"></div>
+        </div>
+        <div class="stat-card c2 skeleton-card">
+          <div class="stat-icon ic2"><i class="ti ti-user-check" aria-hidden="true"></i></div>
+          <div class="stat-label">Joueurs actifs</div>
+          <div class="stat-value" id="stat-playing">—</div>
+          <div class="stat-delta" id="stat-playing-delta"></div>
+        </div>
+        <div class="stat-card c3 skeleton-card">
+          <div class="stat-icon ic3"><i class="ti ti-heart" aria-hidden="true"></i></div>
+          <div class="stat-label">Likes totaux</div>
+          <div class="stat-value" id="stat-likes">—</div>
+          <div class="stat-delta" id="stat-likes-delta"></div>
+        </div>
+        <div class="stat-card c4 skeleton-card">
+          <div class="stat-icon ic4"><i class="ti ti-users" aria-hidden="true"></i></div>
+          <div class="stat-label">Abonnés</div>
+          <div class="stat-value" id="stat-followers">—</div>
+          <div class="stat-delta" id="stat-followers-delta"></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-title">Mes jeux</div>
+              <div class="card-sub">Performances en direct</div>
+            </div>
+            <span class="badge badge-blue" id="games-count-badge">…</span>
+          </div>
+          <div id="home-games-list">
+            <div class="skeleton-list"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">Amis en ligne</div>
+            <span class="see-all" data-page="friends">Voir tout →</span>
+          </div>
+          <div id="home-friends-list">
+            <div class="skeleton-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PROFILE ── -->
+    <section id="page-profile" class="page">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Profil</h1>
+          <p class="page-sub">Informations publiques</p>
+        </div>
+        <button class="btn-refresh" id="btn-refresh-profile" title="Actualiser">
+          <i class="ti ti-refresh"></i>
+        </button>
+      </div>
+
+      <div class="profile-layout">
+        <div class="profile-left">
+          <div class="profile-card">
+            <div class="profile-banner" id="profile-banner">
+              <div class="profile-av-wrap">
+                <div class="profile-av" id="profile-av"></div>
+              </div>
+            </div>
+            <div class="profile-body">
+              <div class="profile-name" id="profile-name">…</div>
+              <div class="profile-handle" id="profile-handle">…</div>
+              <div class="profile-desc" id="profile-desc"></div>
+              <div class="profile-stats">
+                <div class="pstat">
+                  <div class="pstat-val" id="prof-friends">—</div>
+                  <div class="pstat-lbl">Amis</div>
+                </div>
+                <div class="pstat">
+                  <div class="pstat-val" id="prof-followers">—</div>
+                  <div class="pstat-lbl">Abonnés</div>
+                </div>
+                <div class="pstat">
+                  <div class="pstat-val" id="prof-following">—</div>
+                  <div class="pstat-lbl">Suivis</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="card-hd"><div class="card-title">Groupes</div></div>
+            <div id="profile-groups-list"><div class="skeleton-list"></div></div>
+          </div>
+        </div>
+
+        <div class="profile-right">
+          <div class="card-grid-2">
+            <div class="card info-card">
+              <div class="info-label"><i class="ti ti-calendar" aria-hidden="true"></i> Membre depuis</div>
+              <div class="info-value" id="prof-created">—</div>
+            </div>
+            <div class="card info-card">
+              <div class="info-label"><i class="ti ti-device-gamepad-2" aria-hidden="true"></i> Jeux créés</div>
+              <div class="info-value" id="prof-games-count">—</div>
+            </div>
+            <div class="card info-card">
+              <div class="info-label"><i class="ti ti-eye" aria-hidden="true"></i> Visites totales</div>
+              <div class="info-value" id="prof-total-visits">—</div>
+            </div>
+            <div class="card info-card">
+              <div class="info-label"><i class="ti ti-heart" aria-hidden="true"></i> Likes totaux</div>
+              <div class="info-value" id="prof-total-likes">—</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="card-hd">
+              <div class="card-title">Badges récents</div>
+              <span class="card-sub" id="prof-badges-count"></span>
+            </div>
+            <div id="profile-badges-list" class="badges-grid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── GAMES ── -->
+    <section id="page-games" class="page">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Mes jeux</h1>
+          <p class="page-sub" id="games-subtitle">Chargement…</p>
+        </div>
+        <button class="btn-refresh" id="btn-refresh-games" title="Actualiser">
+          <i class="ti ti-refresh"></i>
+        </button>
+      </div>
+      <div class="games-grid" id="games-grid">
+        <div class="skeleton-card game-card-skeleton"></div>
+        <div class="skeleton-card game-card-skeleton"></div>
+        <div class="skeleton-card game-card-skeleton"></div>
+      </div>
+    </section>
+
+    <!-- ── FRIENDS ── -->
+    <section id="page-friends" class="page">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Amis</h1>
+          <p class="page-sub" id="friends-subtitle">Chargement…</p>
+        </div>
+        <div class="topbar-right">
+          <div class="search-bar">
+            <i class="ti ti-search" aria-hidden="true"></i>
+            <input type="text" id="friends-search" placeholder="Rechercher un ami…" />
+          </div>
+          <button class="btn-refresh" id="btn-refresh-friends" title="Actualiser">
+            <i class="ti ti-refresh"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="friends-layout">
+        <div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-hd">
+              <div class="card-title">En ligne maintenant</div>
+              <span class="badge badge-green" id="online-count-badge">0</span>
+            </div>
+            <div id="friends-online-list"><div class="skeleton-list"></div></div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-title">Tous les amis</div>
+              <span class="card-sub" id="all-friends-count"></span>
+            </div>
+            <div id="friends-all-list"><div class="skeleton-list"></div></div>
+          </div>
+        </div>
+
+        <div class="card friends-sidebar-card">
+          <div class="card-hd"><div class="card-title">Statistiques amis</div></div>
+          <div class="friends-stats">
+            <div class="pstat" style="flex:1">
+              <div class="pstat-val" id="fs-total">—</div>
+              <div class="pstat-lbl">Total amis</div>
+            </div>
+            <div class="pstat" style="flex:1">
+              <div class="pstat-val" id="fs-online">—</div>
+              <div class="pstat-lbl">En ligne</div>
+            </div>
+          </div>
+          <div style="margin-top:16px">
+            <div class="card-title" style="font-size:12px;margin-bottom:10px">Jeux populaires parmi tes amis</div>
+            <div id="friends-top-games"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SETTINGS ── -->
+    <section id="page-settings" class="page">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Paramètres</h1>
+          <p class="page-sub">Configuration de RblxDash</p>
+        </div>
+      </div>
+
+      <div class="settings-layout">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px">Compte connecté</div>
+          <div class="settings-user" id="settings-user-info">
+            <div class="settings-av" id="settings-av"></div>
+            <div>
+              <div class="settings-name" id="settings-name">…</div>
+              <div class="settings-uid" id="settings-uid">ID : …</div>
+            </div>
+            <button class="btn-danger" id="btn-logout">
+              <i class="ti ti-logout"></i> Déconnexion
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:4px">À propos de RblxDash</div>
+          <div class="card-sub" style="margin-bottom:16px">Dashboard non-officiel — non affilié à Roblox Corporation</div>
+          <div class="about-grid">
+            <div class="about-item">
+              <i class="ti ti-lock" aria-hidden="true"></i>
+              <div>
+                <div class="about-title">Confidentialité totale</div>
+                <div class="about-desc">Aucune donnée n'est envoyée à nos serveurs. Tout reste dans ton navigateur.</div>
+              </div>
+            </div>
+            <div class="about-item">
+              <i class="ti ti-api" aria-hidden="true"></i>
+              <div>
+                <div class="about-title">API Roblox publique</div>
+                <div class="about-desc">Utilise uniquement les APIs publiques de Roblox. Aucun cookie requis.</div>
+              </div>
+            </div>
+            <div class="about-item">
+              <i class="ti ti-brand-github" aria-hidden="true"></i>
+              <div>
+                <div class="about-title">Open Source</div>
+                <div class="about-desc">Code disponible sur GitHub. Contribue ou fork librement.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px">Limites connues de l'API</div>
+          <div class="limits-list">
+            <div class="limit-item">
+              <i class="ti ti-info-circle" style="color:#00c6ff" aria-hidden="true"></i>
+              <span>Les revenus Robux ne sont pas accessibles via l'API publique (nécessite une authentification Roblox Studio).</span>
+            </div>
+            <div class="limit-item">
+              <i class="ti ti-info-circle" style="color:#00c6ff" aria-hidden="true"></i>
+              <span>Les jeux doivent être publics pour afficher leurs statistiques.</span>
+            </div>
+            <div class="limit-item">
+              <i class="ti ti-info-circle" style="color:#00c6ff" aria-hidden="true"></i>
+              <span>La liste des amis est limitée à 200 entrées par requête.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="api.js"></script>
+<script src="ui.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
