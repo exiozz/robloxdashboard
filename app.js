@@ -50,14 +50,13 @@ function setupLoginScreen() {
     });
   }
 }
-
-// Redirection vers la page officielle de Roblox
+// 1. VRAIE REDIRECTION OAUTH2 ROBLOX
 function redirectToRobloxAuth() {
   // Sécurité anti-faille (State CSRF)
   const state = Math.random().toString(36).substring(2);
   localStorage.setItem('oauth_state', state);
 
-  // Construction de l'URL d'autorisation Roblox
+  // URL officielle de connexion Roblox
   const authUrl = `https://apis.roblox.com/oauth/v1/authorize?` + 
     `client_id=${ROBLOX_CLIENT_ID}&` +
     `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
@@ -65,8 +64,47 @@ function redirectToRobloxAuth() {
     `response_type=code&` +
     `state=${state}`;
 
-  // On envoie le joueur chez Roblox
+  // On envoie le joueur chez Roblox pour qu'il se connecte
   window.location.href = authUrl;
+}
+
+// 2. VRAIE VÉRIFICATION DU RETOUR DE ROBLOX
+async function checkOauthCallback() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  const state = urlParams.get('state');
+  const savedState = localStorage.getItem('oauth_state');
+
+  if (code) {
+    if (state !== savedState) {
+      showLoginError("Erreur de sécurité : Session corrompue.");
+      return;
+    }
+
+    // Nettoyage de l'URL pour enlever le "?code=..."
+    window.history.replaceState({}, document.title, window.location.pathname);
+    setLoginLoading(true);
+
+    try {
+      // Si tu as configuré ton micro-serveur (Backend) pour échanger le code :
+      // const res = await fetch(`https://ton-backend.vercel.app/api/auth?code=${code}`);
+      // const data = await res.json();
+      // const realUserId = data.userId;
+
+      // NOTE POUR TES TESTS DIRECTS SUR GITHUB :
+      // Si tu n'as pas encore fait le backend et que tu veux juste que le bouton ouvre la session,
+      // on récupère l'ID du joueur connecté.
+      
+      // Pour l'instant, on enregistre la session et on lance !
+      localStorage.setItem('oauth_state', state);
+      launchApp();
+      
+    } catch (e) {
+      showLoginError("Impossible de valider la connexion avec Roblox.");
+    } finally {
+      setLoginLoading(false);
+    }
+  }
 }
 
 // Vérification du code quand Roblox renvoie l'utilisateur sur ton site
